@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Combat Ledger">
+<meta name="theme-color" content="#0d0708"><link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Crimson+Text&display=swap" rel="stylesheet"><title>Ravenloft Combat Ledger</title>
+<style>
+:root{color-scheme:dark;--bg:#0f1115;--cd:#1a1d24;--ln:#2c313c;--tx:#ece9e3;--mu:#8d93a0;--ac:#a8242c;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 Georgia,system-ui,serif;padding:10px 10px calc(70px + env(safe-area-inset-bottom,0px));max-width:760px;margin:auto}
+h1{font-size:18px;margin:0}h3{margin:4px 0 8px}.mu{color:var(--mu);font-size:13px}
+.card{background:var(--cd);border:1px solid var(--ln);border-radius:10px;padding:10px;margin:8px 0}.card.turn{border-color:var(--ac);box-shadow:0 0 0 1px var(--ac)}
+.r{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:space-between;margin:4px 0}
+button,input,select,textarea{font:inherit;background:#242833;color:var(--tx);border:1px solid var(--ln);border-radius:8px;padding:8px 10px}button{cursor:pointer}button.p{background:var(--ac);border-color:var(--ac)}
+input[type=number]{width:70px}input[type=text],input:not([type]),select,textarea{width:100%}label{display:block;margin:6px 0;font-size:13px;color:var(--mu)}label input[type=checkbox]{width:auto}
+.hp{height:10px;background:#0b0c10;border-radius:5px;overflow:hidden}.hp i{display:block;height:100%}
+.ch{display:inline-block;background:#303545;border-radius:12px;padding:2px 9px;font-size:13px;margin:2px;cursor:pointer}
+.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:#14171d;border-top:1px solid var(--ln);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabs button{flex:1;border:0;border-radius:0;background:none;padding:14px 4px}.tabs button.on{color:#fff;border-top:2px solid var(--ac)}
+.ov{position:fixed;inset:0;background:#000b;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:calc(20px + env(safe-area-inset-top,0px)) 10px 20px;z-index:9}.ov .card{width:100%;max-width:420px}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:6px}pre{white-space:pre-wrap;font-size:12px;color:var(--mu);margin:4px 0}
+body{background:radial-gradient(ellipse at 50% -10%,#3a1015 0,#0d0708 55%) fixed;font-family:"Crimson Text",Georgia,serif;font-size:17px}
+h1,h3,b,.tabs button,button.p{font-family:Cinzel,Georgia,serif;letter-spacing:.04em}
+h1{color:#d9c7a3;font-size:18px;text-shadow:0 0 12px #8b1a22}
+.card{background:linear-gradient(#1b1214,#140d0f);border-color:#4a2a2e}.card.turn{border-color:#c43a44;box-shadow:0 0 14px #8b1a2299}
+button,input,select,textarea{background:#241518;border-color:#4a2a2e}button.p{background:#8b1a22;border-color:#b3333c}
+.tabs{background:#120a0c;border-top-color:#4a2a2e}.tabs button{padding:14px 2px;font-size:13px}.tabs button.on{border-top-color:#c43a44;color:#e8d9b8}
+.ch{background:#3a2024}.mu{color:#a8929a}.dn{opacity:.5}
+.sl{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;z-index:30;background:radial-gradient(circle,#8b1a2255,#0009 70%);animation:slk 1.9s ease forwards;font-family:Cinzel,Georgia,serif;text-align:center}.sl b{font-size:64px;line-height:1;text-shadow:0 0 24px #c43a44}.sl span{font-size:22px;letter-spacing:.12em;color:#e8d9b8;text-shadow:0 0 10px #000}
+@keyframes slk{0%{opacity:0;transform:scale(.7)}15%{opacity:1;transform:scale(1.08)}65%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.25);filter:blur(5px)}}@keyframes lid{to{transform:rotate(-55deg)}}@keyframes fi{from{opacity:0;transform:translateY(10px)}}@keyframes gl{from{opacity:0}to{opacity:.85}}@keyframes dr{from{transform:rotate(-360deg) scale(.3);opacity:0}}@keyframes vp{0%{opacity:0;transform:scale(.4);letter-spacing:.5em}60%{transform:scale(1.15)}100%{opacity:1;transform:scale(1)}}
+</style></head><body><div id="app"></div>
+<script src="config.js"></script>
+<script>
+const $=s=>document.querySelector(s),E=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),U=()=>Math.random().toString(36).slice(2,8);
+/* ================= data ================= */
+const TPL={Zombie:[22,8],Wolf:[11,13],"Dire Wolf":[37,14],Skeleton:[13,13],Ghoul:[22,12],"Strahd Zombie":[22,8],"Vampire Spawn":[82,15],Werewolf:[58,11],"Strahd von Zarovich":[144,16],"Swarm of Bats":[22,12],"Barovian Witch":[22,10],"Animated Armor":[33,18],Bandit:[11,12],Doru:[27,12]};
+const ENC={"Wolves (3)":[["Wolf",3]],"Zombies (4)":[["Zombie",4]],"Strahd Zombies (3)":[["Strahd Zombie",3]],"Vampire Spawn (2)":[["Vampire Spawn",2]],"Dire Wolves (2)":[["Dire Wolf",2]],"Ghouls (3)":[["Ghoul",3]],"Werewolves (2)":[["Werewolf",2]],"Strahd (solo)":[["Strahd von Zarovich",1]],"Death House – Animated Armor":[["Animated Armor",1]],"Barovia – Doru":[["Doru",1]],"Random Road – Bandits":[["Bandit",4]]};
+const TYPES="Slashing Piercing Bludgeoning Fire Cold Lightning Thunder Acid Poison Necrotic Radiant Psychic Force Healing Other".split(" ");
+const AC={};"Fire Bolt:Fire:s,Ray of Frost:Cold:s,Sacred Flame:Radiant:s,Eldritch Blast:Force:s,Vicious Mockery:Psychic:s,Toll the Dead:Necrotic:s,Chill Touch:Necrotic:s,Poison Spray:Poison:s,Produce Flame:Fire:s,Magic Missile:Force:s,Burning Hands:Fire:s,Guiding Bolt:Radiant:s,Inflict Wounds:Necrotic:s,Thunderwave:Thunder:s,Fireball:Fire:s,Lightning Bolt:Lightning:s,Cure Wounds:Healing:s,Healing Word:Healing:s,Mass Healing Word:Healing:s,Prayer of Healing:Healing:s,Spiritual Weapon:Force:s,Spirit Guardians:Radiant:s,Hellish Rebuke:Fire:s,Hex:Necrotic:s,Shatter:Thunder:s,Scorching Ray:Fire:s,Cone of Cold:Cold:s,Vampiric Touch:Necrotic:s,Moonbeam:Radiant:s,Call Lightning:Lightning:s,Divine Smite:Radiant,Sneak Attack:Piercing,Lay on Hands:Healing,Second Wind:Healing,Healing Potion:Healing,Longsword:Slashing,Greatsword:Slashing,Greataxe:Slashing,Handaxe:Slashing,Shortsword:Piercing,Rapier:Piercing,Dagger:Piercing,Longbow:Piercing,Shortbow:Piercing,Light Crossbow:Piercing,Warhammer:Bludgeoning,Mace:Bludgeoning,Quarterstaff:Bludgeoning,Unarmed Strike:Bludgeoning,Bite:Piercing,Claw:Slashing,Slam:Bludgeoning,Life Drain:Necrotic,Swarm Bites:Piercing,Multiattack:Other,Fall:Bludgeoning,Environment Hazard:Other".split(",").forEach(x=>{const[n,t,s]=x.split(":");AC[n.toLowerCase()]={n,t,s:!!s}});
+const FX={poisoned:"Disadvantage on attack rolls and ability checks.",prone:"Crawl only. Melee attacks vs it have advantage, ranged have disadvantage; its attacks have disadvantage.",stunned:"Incapacitated, can’t move, fails Str/Dex saves; attacks vs it have advantage.",paralyzed:"Incapacitated, can’t move or speak, fails Str/Dex saves; attacks vs it have advantage; melee hits within 5 ft are crits.",frightened:"Disadvantage on checks and attacks while the source is in sight; can’t move closer to it.",charmed:"Can’t attack the charmer; charmer has advantage on social checks.",blinded:"Can’t see; attacks vs it have advantage, its attacks have disadvantage.",restrained:"Speed 0; attacks vs it have advantage; its attacks and Dex saves have disadvantage.",grappled:"Speed 0.",invisible:"Attacks vs it have disadvantage; its attacks have advantage.",concentrating:"Con save (DC 10 or half the damage) when damaged; ends if incapacitated.",exhaustion:"Cumulative by level: 1 check disadv., 2 speed halved, 3 attack/save disadv., 4 HP max halved, 5 speed 0, 6 death.",slow:"Speed halved, –2 AC and Dex saves, can’t use reactions, only one attack.",hasted:"Speed doubled, +2 AC, advantage on Dex saves, one extra limited action.",blessed:"+1d4 to attack rolls and saving throws.",baned:"–1d4 to attack rolls and saving throws.","faerie fire":"Attacks vs it have advantage; can’t benefit from being invisible.",hex:"Hexer deals +1d6 necrotic on hits; disadvantage on checks of the chosen ability.","hunter's mark":"Marker deals +1d6 on weapon hits and tracks it easily.","shield of faith":"+2 AC."};
+const PF={Zombie:{t:'Undead Fortitude: when reduced to 0 HP, Con save DC 5 + damage taken (not vs radiant or a crit) to drop to 1 HP instead. Slam +3, 1d6+1 bludgeoning.'},Wolf:{t:'Pack Tactics: advantage on attacks if an ally is adjacent to the target. Bite +4, 1d6+2 piercing; Str DC 11 or knocked prone.'},'Dire Wolf':{t:'Pack Tactics. Bite +5, 2d6+3 piercing; Str DC 13 or knocked prone.'},Skeleton:{t:'Vulnerable to bludgeoning; immune to poison. Shortsword or shortbow +4, 1d6+2.'},Ghoul:{t:'Claws +4, 2d4+2 slashing: Con DC 10 or paralyzed for 1 minute (elves and undead are immune); repeats the save at the end of each of its turns. Bite +2, 2d6+2 piercing.'},'Vampire Spawn':{t:'Two attacks per turn. Claws +6, 2d4+3 slashing (can grapple instead of damage). Bite +6, 1d6+3 piercing plus 2d6 necrotic on a grappled, restrained, or incapacitated target; it heals that much and the target’s max HP drops by the necrotic damage. Regenerates 10 HP per turn, but not in sunlight, running water, or after radiant damage. Sunlight and running water hurt it.'},Werewolf:{t:'Immune to nonmagical, non-silvered weapon damage. Bite (wolf or hybrid form): Con DC 12 or cursed with lycanthropy.'},'Swarm of Bats':{t:'Resistant to bludgeoning, piercing, slashing. Flies, no opportunity attacks, senses by echolocation. Bites +4, 2d4 piercing (1d4 at half HP or less).'},'Animated Armor':{t:'Looks like inert armor until it moves. Antimagic Susceptibility: incapacitated in an antimagic field. Two slams +4, 1d6+2 bludgeoning.'},Bandit:{t:'Scimitar +3, 1d6+1. Light crossbow +3, 1d8+1.'},'Strahd von Zarovich':{t:'Legendary Resistance and legendary actions; lair actions on initiative 20 in his lair. Charm, bite, and spellcasting details: check your book and add them in notes.',lr:3,la:3,lair:true},'Strahd Zombie':{t:'Not in the SRD. Add your own notes.'},'Barovian Witch':{t:'Not in the SRD. Add your own notes.'},Doru:{t:'Placeholder stats. Add your own notes.'}};
+const IB={Zombie:-2,Wolf:2,'Dire Wolf':2,Skeleton:2,Ghoul:2,'Strahd Zombie':-2,'Vampire Spawn':3,Werewolf:1,'Strahd von Zarovich':4,'Swarm of Bats':2,'Barovian Witch':0,'Animated Armor':0,Bandit:1,Doru:0};
+const ITEMS={'Potion of Healing':'Drink to regain 2d4+2 HP.','Potion of Greater Healing':'Drink to regain 4d4+4 HP.','Potion of Superior Healing':'Drink to regain 8d4+8 HP.','Potion of Supreme Healing':'Drink to regain 10d4+20 HP.','Potion of Fire Resistance':'Resistance to fire damage for 1 hour.','Potion of Invisibility':'Invisible for 1 hour, ends early if you attack or cast a spell.','Potion of Speed':'Hasted for 1 minute.','Antitoxin':'Advantage on saves against poison for 1 hour.','Holy Water':'Thrown flask: 2d6 radiant damage to a fiend or undead it splashes.','Alchemist’s Fire':'Thrown flask: 1d4 fire damage each turn until put out (Dex DC 10).','Acid Vial':'Thrown: 2d6 acid damage on a hit.','Healer’s Kit':'10 uses. Stabilize a creature at 0 HP without a check.','Silvered Weapon':'Counts as silvered against creatures resistant to nonmagical weapons, like werewolves.','Holy Symbol':'Spellcasting focus for clerics and paladins.','Bag of Holding':'Holds up to 500 lb in an extradimensional space; weighs 15 lb.','Cloak of Protection':'+1 AC and +1 to saving throws. Requires attunement.','Ring of Protection':'+1 AC and +1 to saving throws. Requires attunement.','Cloak of Elvenkind':'Advantage on Stealth; others have disadvantage on Perception checks to see you. Requires attunement.','Cloak of Displacement':'Attackers have disadvantage against you until you take damage. Requires attunement.','Boots of Elvenkind':'Your steps make no sound. Advantage on Stealth checks that rely on moving silently.','Gauntlets of Ogre Power':'Strength becomes 19. Requires attunement.','Headband of Intellect':'Intelligence becomes 19. Requires attunement.','Amulet of Health':'Constitution becomes 19. Requires attunement.','Goggles of Night':'Darkvision out to 60 ft (or extends existing darkvision by 60 ft).','Ring of Resistance':'Resistance to one damage type, set by its gem. Requires attunement.','Wand of Magic Missiles':'7 charges, regains some at dawn. Each charge casts Magic Missile; spend more for extra darts.','Wand of Fireballs':'7 charges, regains some at dawn. Spend 3 charges to cast Fireball (DC 15); more charges raise the level.','Flame Tongue':'Command word ignites the blade: +2d6 fire damage on hits. Requires attunement.','Gold Pieces':'Coins. Put the amount in the name, like “120 gp”.','Gemstone':'A valuable gem. Put its worth in the name.'};
+const LL=Object.keys(ITEMS).concat(Object.values(AC).filter(a=>a.s).map(a=>'Scroll of '+a.n));
+/* ================= state ================= */
+let S;try{S=JSON.parse(localStorage.getItem("rcl"))}catch(e){}S=S||{party:[],battles:[],cur:null};
+S.tpl=S.tpl||{};S.enc=S.enc||{};
+/* which shared game is this, and is this device the DM? */
+const QS=new URLSearchParams(location.search),HK=(location.hash.match(/dm=([\w-]+)/)||[])[1];
+let GAME=null;try{GAME=JSON.parse(localStorage.getItem('rcl_game'))}catch(e){}
+let GID=QS.get('g')||(GAME&&GAME.g)||null;if(GID&&!/^[\w-]{4,40}$/.test(GID))GID=null;
+let KEY=GID?(HK||(GAME&&GAME.g==GID?GAME.k:null)||null):null;
+if(GID&&KEY){GAME={g:GID,k:KEY};try{localStorage.setItem('rcl_game',JSON.stringify(GAME))}catch(e){}}
+const ISPL=!!GID&&!KEY;
+let tab="combat",mode=ISPL?"pl":"dm",share=false,P=null,PP=null,modal=null,info=null,dg=null,ED=null,LOGS={},RCK='';
+try{share=localStorage.getItem('rcl_share')=='1'}catch(e){}
+let UN=[],prevS=JSON.stringify(S.cur),VD={},pdone=false;
+let seenC=false,LO={};function tl(i){LO[i]=!LO[i];render()}
+let PI='';
+let NETA=null,UID=null,ISDM=false,CL={},SH={},PL=[],PK='',pTab='b',SHM='',shT=null,NETERR='',CONN=false,INITS={},INA={},LIVEJ='',SYNC=false,pushT=null,LT=0,DEV='';
+try{LT=+localStorage.getItem('rcl_t')||0;DEV=localStorage.getItem('rcl_dev')||'';if(!DEV){DEV=U()+U();localStorage.setItem('rcl_dev',DEV)}}catch(e){}
+const B=()=>'games/'+GID+'/';
+/* ================= helpers ================= */
+const T=()=>({...TPL,...(S.tpl||{})}),EN=()=>({...(S.enc||{}),...ENC});
+const gc=id=>S.cur.cs.find(c=>c.id==id);
+const srt=()=>S.cur.cs.map((c,i)=>[c,i]).sort((a,b)=>b[0].init-a[0].init||(b[0].dx||0)-(a[0].dx||0)||a[1]-b[1]).map(x=>x[0]);
+const pct=c=>c.max?c.hp/c.max:0,col=p=>p>.5?"#3fa34d":p>.25?"#d4a72c":"#c0392b",stt=c=>{const p=pct(c);return p>.5?"Healthy":p>.25?"Bloodied":p>0?"Near death":"Down"};
+const skp=c=>(c.type=="en"&&c.hp<=0)||c.dead||c.stab;
+const slain=c=>(c.type=='en'&&c.hp<=0)||c.dead;
+const ib=t=>{const x=(S.tpl||{})[t];return x&&x[2]!=null?x[2]:(IB[t]||0)};
+const sg=n=>(n<0?'−':'+')+Math.abs(n);
+const pst=p=>[p.pp?'Passive Perception '+p.pp:'',p.dc?'Spell DC '+p.dc:'',p.sp?'Speed '+p.sp+' ft':'',p.rs?E(p.rs):''].filter(Boolean).join(' · ');
+function agg(logs){const m={};for(const L of logs)for(const e of L){if(e.src=="Environment/Unknown")continue;const s=m[e.src]=m[e.src]||{dmg:0,heal:0,k:0,hi:0,cr:0,sp:0,by:{}};if(e.ty=="Healing")s.heal+=e.amt;else{s.dmg+=e.amt;s.hi=Math.max(s.hi,e.amt);s.by[e.ty]=(s.by[e.ty]||0)+e.amt}if(e.kill)s.k++;if(e.crit)s.cr++;if((AC[(e.act||"").toLowerCase()]||{}).s)s.sp++}return m}
+window.alert=function(m){document.body.insertAdjacentHTML('beforeend',`<div class=ov id=al><div class=card><p>${E(m)}</p><button class=p onclick="document.getElementById('al').remove()">OK</button></div></div>`)};
+/* ================= saving, undo ================= */
+const IDB=(()=>{const o=new Promise((res,rej)=>{try{const r=indexedDB.open('rcl',1);r.onupgradeneeded=()=>r.result.createObjectStore('k');r.onsuccess=()=>res(r.result);r.onerror=()=>rej()}catch(e){rej()}});return{get:()=>o.then(d=>new Promise(r=>{const q=d.transaction('k').objectStore('k').get('s');q.onsuccess=()=>r(q.result);q.onerror=()=>r()})).catch(()=>{}),set:v=>o.then(d=>{d.transaction('k','readwrite').objectStore('k').put(v,'s')}).catch(()=>{})}})();
+function sv(){
+const c=S.cur;
+if(c){const en=c.cs.filter(x=>x.type=='en');c.won=en.length>0&&en.every(x=>x.hp<=0)}
+const now=JSON.stringify(c);
+if(now!==prevS){
+try{const p=JSON.parse(prevS);if(p&&c&&p.id==c.id){const dd=c.cs.filter(x=>x.type=='en'&&x.hp<=0&&((p.cs.find(y=>y.id==x.id)||{}).hp||0)>0);if(dd.length)slay(dd)}}catch(e){}
+UN.push(prevS);if(UN.length>25)UN.shift();prevS=now}
+LT=Date.now();
+try{localStorage.setItem('rcl',JSON.stringify(S));localStorage.setItem('rcl_t',LT)}catch(e){}
+bc();render();IDB.set(JSON.stringify(S));pubParty();dmPush()}
+function undo(){if(!UN.length)return;prevS=UN.pop();S.cur=JSON.parse(prevS);if(S.cur&&S.battles.length&&S.battles[S.battles.length-1].id==S.cur.id)S.battles.pop();sv()}
+/* ================= live sharing ================= */
+function snap(){const c=S.cur,pcs=new Set(c.cs.filter(x=>x.type=="pc").map(x=>x.name)),a=agg([c.log]),lb={};for(const k in a)if(pcs.has(k))lb[k]=[a[k].dmg,a[k].heal,a[k].k];return{round:c.round,turn:c.turn,lb,cs:srt().map(x=>x.type=="pc"?{id:x.id,n:x.name,pc:1,hp:x.hp,max:x.max,t:x.temp,cd:x.conds}:{id:x.id,n:x.name,st:stt(x),cd:x.conds})}}
+function vic(){const c=S.cur,pcs=new Set(c.cs.filter(x=>x.type=='pc').map(x=>x.name)),a=agg([c.log]);return{rounds:c.round,en:c.cs.filter(x=>x.type=='en').length,rows:Object.entries(a).filter(([n])=>pcs.has(n)).sort((x,y)=>y[1].dmg-x[1].dmg).map(([n,s])=>({n,d:s.dmg,h:s.heal,k:s.k,hi:s.hi,c:s.cr}))}}
+function bc(){
+if(!NETA||!ISDM||!SYNC)return;let d;
+if(!share)d={off:1};
+else{d=S.cur?snap():{none:1};d.chest=S.chest?{open:!!S.chest.open,items:S.chest.open?S.chest.items:[]}:null;d.victory=S.cur&&S.cur.won?vic():null;d.rc=S.cur&&S.cur.rc?S.cur.cs.filter(c=>c.type=='pc').map(c=>({id:c.pid||c.id,n:c.name,ok:!!c.rdy})):null}
+const j=JSON.stringify(d);if(j===LIVEJ)return;LIVEJ=j;NETA.set(B()+'live',{j}).catch(()=>{LIVEJ=''})}
+function tg(){if(!GID)return alert(window.FB_CONFIG?'Create a shared game on the Party tab first.':'Sharing isn’t set up in this copy yet.');share=!share;try{localStorage.setItem('rcl_share',share?'1':'0')}catch(e){}bc();render()}
+function md(){mode=mode=="dm"?"pl":"dm";render()}
+/* ================= dialogs ================= */
+function dlg(t,b,f,ok){dg={t,b,f,ok:ok||'OK'};render()}
+function dgGo(){const f=dg&&dg.f;dg=null;if(f)f();render()}
+function dgX(){dg=null;render()}
+function dgH(){return`<div class=ov><div class=card><h3>${E(dg.t)}</h3>${dg.b}<div class=r><button class=p onclick=dgGo()>${E(dg.ok)}</button>${dg.f?'<button onclick=dgX()>Cancel</button>':''}</div></div></div>`}
+/* ================= combat actions ================= */
+function nb(enc){S.cur={id:U(),date:Date.now(),round:1,turn:null,cs:[],log:[]};S.chest=S.loot&&S.loot[enc]?{items:S.loot[enc].map(x=>({n:x.n,d:x.d})),open:false}:null;(EN()[enc]||[]).forEach(([t,n])=>{for(let i=0;i<n;i++)addEn(t,1)});sv()}
+function newB(enc){S.cur?dlg('Discard the current battle without saving?','',()=>nb(enc),'Discard'):nb(enc)}
+function addEn(t,q){const[h,a]=T()[t],cs=S.cur.cs,n=cs.filter(c=>c.base==t).length,pf=PF[t]||{};if(n==1)cs.find(c=>c.base==t).name=t+" 1";const c={id:U(),base:t,name:n?t+" "+(n+1):t,type:"en",max:h,hp:h,temp:0,ac:a,init:0,dx:0,conds:[]};if(pf.lr)c.lr=pf.lr;if(pf.la)c.lm=c.la=pf.la;cs.push(c);if(!q)sv()}
+function addPC(pid){const p=S.party.find(x=>x.id==pid),h=Math.max(0,+$("#h"+pid).value||0);S.cur.cs.push({id:U(),pid,name:p.name,type:"pc",max:p.max,hp:Math.min(h,p.max),temp:0,ac:p.ac,init:0,conds:[]});sv()}
+function setI(id,v){const c=gc(id);c.init=+v||0;if(S.cur.rc&&c.type=='pc')c.rdy=true;sv()}
+function setD(id,v){gc(id).dx=+v||0;sv()}
+function nx(){
+if(!S.cur)return;const s=srt();if(!s.length)return;
+const r=S.cur.round;let i=s.findIndex(c=>c.id==S.cur.turn);
+if(i>=0)s[i].conds=s[i].conds.map(k=>k.d!=null?{n:k.n,d:k.d-1}:k).filter(k=>k.d==null||k.d>0);
+let n=0;do{i++;if(i>=s.length){i=0;S.cur.round++}}while(skp(s[i])&&++n<=s.length);
+S.cur.turn=s[i].id;
+if(S.cur.round>r)S.cur.cs.forEach(c=>{if(c.lm)c.la=c.lm});
+sv()}
+function endB(){dlg('End and save this battle?','',()=>{const c=S.cur;S.battles.push({id:c.id,date:c.date,rounds:c.round,names:c.cs.map(x=>x.name),log:c.log});S.cur=null;sv()},'End & Save')}
+function goHome(){const c=S.cur;S.battles.push({id:c.id,date:c.date,rounds:c.round,names:c.cs.map(x=>x.name),log:c.log});S.cur=null;tab='combat';sv()}
+function vrev(){VD[S.cur.id]=true;render()}
+function th(id){dlg('Temp HP',`<input id=dv type=number inputmode=numeric placeholder='Amount'><div class=mu>Keeps the higher of old and new.</div>`,()=>{const v=+$('#dv').value;if(v>0){const c=gc(id);c.temp=Math.max(c.temp,v);sv()}},'Add')}
+function cd(id){dlg('Add conditions',`<input id=dv placeholder='Slow:3, Poisoned, Blessed:10'><div class=mu>Blank duration = permanent.</div>`,()=>{const c=gc(id);$('#dv').value.split(',').forEach(x=>{const[n,d]=x.split(':');if(n.trim())c.conds.push({n:n.trim(),d:d&&+d>0?+d:null})});sv()},'Add')}
+function ci(id,i){const c=gc(id),k=c.conds[i],fx=FX[k.n.toLowerCase().replace('’',String.fromCharCode(39))]||'No preset description.';dlg(k.n,`<p>${E(fx)}</p><div class=mu>${k.d!=null?k.d+' rounds left':'Permanent'}</div>`,()=>{c.conds.splice(i,1);sv()},'Remove')}
+function rm(id){dlg('Remove from combat?','',()=>{S.cur.cs=S.cur.cs.filter(c=>c.id!=id);sv()},'Remove')}
+function ds(id,k){const c=gc(id);if(k=="s"){c.ok=(c.ok||0)+1;if(c.ok>=3)c.stab=1}else if(k=="20"){c.hp=1;c.ok=0;c.fl=0}else{c.fl=(c.fl||0)+(k=="1"?2:1);if(c.fl>=3)c.dead=1}sv()}
+function dm(id){modal=id;render()}function cm(){modal=null;render()}
+function fillT(){const a=AC[$("#mx").value.trim().toLowerCase()];if(a)$("#mt").value=a.t}
+function ap(){const ids=[...document.querySelectorAll('.mt2:checked')].map(x=>x.value);if(!ids.length)return alert('Pick at least one target.');const m={};document.querySelectorAll('.mm').forEach(x=>m[x.dataset.i]=+x.value);const src=modal=='env'?'Environment/Unknown':gc(modal).name,amt=Math.max(0,+$('#ma').value||0),ty=$('#mt').value,act=$('#mx').value.trim(),cr=$('#mc').checked,nt=[];ids.forEach(id=>{const t=gc(id),a=ty=='Healing'?amt:Math.floor(amt*(m[id]??1));let kill=false;if(ty=='Healing'){t.hp=Math.min(t.max,t.hp+a);if(t.hp>0){t.ok=0;t.fl=0;t.stab=0;t.dead=0}}else{let d=a;const x=Math.min(t.temp,d);t.temp-=x;d-=x;const b=t.hp;t.hp=Math.max(0,b-d);kill=b>0&&t.hp==0;if(b==0&&d>0&&t.type=='pc'){t.fl=(t.fl||0)+(cr?2:1);if(t.fl>=3)t.dead=1}if(a>0&&t.conds.some(k=>/concentrat/i.test(k.n)))nt.push(t.name+': concentration check, Con save DC '+Math.max(10,Math.floor(a/2)))}S.cur.log.push({r:S.cur.round,src,tgt:t.name,amt:a,ty,crit:cr,act,kill})});modal=null;sv();if(nt.length)alert(nt.join(' | '))}
+function inf(id){info=id;render()}
+function svN(){gc(info).note=$('#nt').value.trim();info=null;sv()}
+function lr(id){const c=gc(id);if(c.lr>0){c.lr--;sv()}}
+function la(id){const c=gc(id);if(c.la>0){c.la--;sv()}}
+function rollE(){if(!S.cur)return;const es=S.cur.cs.filter(c=>c.type=='en');if(!es.length)return alert('No enemies in the fight yet.');es.forEach(c=>{const b=ib(c.base),r=1+Math.floor(Math.random()*20);c.ir={r,b};c.init=r+b;c.dx=b});sv();dlg('Enemy initiative',[...es].sort((a,b)=>b.init-a.init).map((c,i)=>`<div class=r style='border-bottom:1px solid var(--ln);padding:5px 0'><span>${E(c.name)}</span><span><span style='display:inline-block;animation:dr .6s both;animation-delay:${i*.08}s'>🎲</span> <b style='color:${c.ir.r==20?'#e0b43c':c.ir.r==1?'#e0483c':'inherit'}'>${c.ir.r}</b> ${sg(c.ir.b)} = <b style='font-size:1.15em'>${c.init}</b></span></div>`).join('')+`<div class=mu style='margin-top:6px'>Gold = natural 20, red = natural 1. Ties break by the bonus. You can still edit any Init on the cards.</div>`)}
+function startRC(){if(!S.cur.cs.some(c=>c.type=='pc'))return alert('Add your party members to the fight first.');S.cur.cs.forEach(c=>{if(c.type=='pc')c.rdy=false});S.cur.rc=true;INA={};INITS={};if(NETA&&ISDM)NETA.remove(B()+'inits').catch(()=>{});if(S.cur.cs.some(c=>c.type=='en'))rollE();else sv()}
+function beginB(){S.cur.rc=false;nx()}
+function cancelRC(){S.cur.rc=false;sv()}
+function lootD(){const c=S.chest;dlg('Loot',c.items.map(x=>`<div style='margin:6px 0'><b>${E(x.n)}</b><div class=mu>${E(x.d||'')}</div></div>`).join(''),()=>{c.open=!c.open;sv()},c.open?'Close chest':'Open chest for players')}
+function slay(d){const e=document.createElement('div');e.className='sl';e.innerHTML=`<b>☠</b><span>${E(d.map(x=>x.name).join(', '))} SLAIN</span>`;document.body.appendChild(e);setTimeout(()=>e.remove(),1900)}
+/* ================= party, history, backup ================= */
+function addP(){const n=$('#pn').value.trim(),m=+$('#pm').value,a=+$('#pa').value;if(!n||!m)return;S.party.push({id:U(),name:n,max:m,ac:a||10,pp:+$('#pp').value||0,dc:+$('#pd').value||0,sp:+$('#ps').value||0,rs:$('#pr').value.trim()});sv()}
+function edP(id){const p=S.party.find(x=>x.id==id);dlg('Edit character',`<label>Name<input id=e1 value="${E(p.name)}"></label><label>Max HP<input id=e2 type=number value="${p.max}"></label><label>AC<input id=e3 type=number value="${p.ac}"></label><label>Passive Perception<input id=e4 type=number value="${p.pp||''}"></label><label>Spell save DC<input id=e5 type=number value="${p.dc||''}"></label><label>Speed (ft)<input id=e6 type=number value="${p.sp||''}"></label><label>Resistances / notes<input id=e7 value="${E(p.rs||'')}"></label>`,()=>{p.name=$('#e1').value.trim()||p.name;p.max=+$('#e2').value||p.max;p.ac=+$('#e3').value||p.ac;p.pp=+$('#e4').value||0;p.dc=+$('#e5').value||0;p.sp=+$('#e6').value||0;p.rs=$('#e7').value.trim();sv()},'Save')}
+function rmP(id){dlg('Remove this character?','',()=>{S.party=S.party.filter(p=>p.id!=id);sv()},'Remove')}
+function delB(id){dlg('Delete this battle?','',()=>{S.battles=S.battles.filter(b=>b.id!=id);sv()},'Delete')}
+function tlog(id){LOGS[id]=!LOGS[id];render()}
+function exp(){$("#bk").value=JSON.stringify(S);$("#bk").select()}
+function imp(){let d;try{d=JSON.parse($('#bk').value);if(!d.party||!d.battles)throw 0}catch(e){return alert('That does not look like a valid backup.')}dlg('Replace all current data with this backup?','',()=>{S=d;S.tpl=S.tpl||{};S.enc=S.enc||{};sv()},'Import')}
+/* ================= prep ================= */
+function addT(){const n=$('#tn').value.trim(),h=+$('#th').value,a=+$('#ta').value,b=+$('#ti').value||0;if(!n||!h)return;S.tpl=S.tpl||{};S.tpl[n]=[h,a||10,b];sv()}
+function saveE(){
+const n=$('#en').value.trim(),l=[];
+document.querySelectorAll('.ec').forEach(x=>{if(+x.value>0)l.push([x.dataset.t,+x.value])});
+if(!n||!l.length)return alert('Name it and pick at least one enemy.');
+const lt=$('#lt')?$('#lt').value.split('\n').map(s=>s.trim()).filter(Boolean).map(s=>{const[a,...b]=s.split('|');return{n:a.trim(),d:b.join('|').trim()}}):[];
+S.enc=S.enc||{};S.loot=S.loot||{};
+if(ED&&ED!=n){delete S.enc[ED];delete S.loot[ED]}
+S.enc[n]=l;if(lt.length)S.loot[n]=lt;else delete S.loot[n];
+ED=null;sv()}
+function editE(k){ED=k;window.scrollTo(0,0);render()}
+function cancelE(){ED=null;render()}
+function delE(k){dlg('Delete this encounter?','',()=>{delete S.enc[k];if(S.loot)delete S.loot[k];sv()},'Delete')}
+function lootDesc(n){const t=n.trim().replace(/'/g,'’'),k=t.toLowerCase();for(const i in ITEMS)if(i.toLowerCase()==k)return ITEMS[i];let m=t.match(/^scroll of (.+)$/i);if(m){const a=AC[m[1].trim().toLowerCase().replace(/’/g,"'")];return'One-use scroll of '+m[1].trim()+(a&&a.t&&a.t!='Healing'?' ('+a.t.toLowerCase()+' damage)':'')+'. Needs the spell on your class list, or an Arcana check to cast it.'}m=t.match(/\+([123])\b/);if(m)return'+'+m[1]+' to attack and damage rolls if a weapon, or +'+m[1]+' AC if armor or a shield. Counts as magical.';return''}
+function addLoot(){const li=document.getElementById('li'),ta=document.getElementById('lt'),n=li.value.trim();if(!n)return;const d=lootDesc(n);ta.value+=(ta.value&&!/\n$/.test(ta.value)?'\n':'')+n+(d?' | '+d:'');li.value=''}
+function fillLoot(){const ta=document.getElementById('lt');ta.value=ta.value.split('\n').map(l=>{const i=l.indexOf('|'),n=(i<0?l:l.slice(0,i)).trim(),d=i<0?'':l.slice(i+1).trim();if(!n||d)return l;const x=lootDesc(n);return x?n+' | '+x:l}).join('\n')}
+/* ================= accounts: claims, sheets, party list ================= */
+const myPid=()=>NETA?(Object.keys(CL).find(p=>CL[p]==UID)||null):null;
+function syncSheets(){let ch=false;for(const pid in SH){const s=SH[pid],p=S.party.find(x=>x.id==pid);if(!p||!s)continue;['max','ac','pp','dc','sp'].forEach(k=>{if(s[k]!=null&&s[k]!==''&&p[k]!==s[k]){p[k]=s[k];ch=true}});if(s.rs!=null&&p.rs!==s.rs){p.rs=s.rs;ch=true}}if(ch)sv()}
+function pubParty(){if(!NETA||!ISDM||!SYNC)return;const j=JSON.stringify(S.party.map(p=>({id:p.id,n:p.name})));if(j===PK)return;PK=j;NETA.set(B()+'party',{j}).catch(()=>{PK=''})}
+async function claim(pid){if(!pid||!NETA)return;if(CL[pid]&&CL[pid]!=UID)return alert('That character is already claimed. Ask the DM to release it.');const old=myPid();try{await NETA.set(B()+'claimed/'+pid,UID);if(old&&old!=pid)await NETA.remove(B()+'claimed/'+old)}catch(e){alert('Could not claim that character. It may already be taken.')}}
+async function unclaim(){const p=myPid();if(p)try{await NETA.remove(B()+'claimed/'+p)}catch(e){}}
+function pme(v){claim(v)}
+async function psub(){const el=document.getElementById('pi'),v=+el.value,mp=myPid();if(el.value===''||isNaN(v))return alert('Enter your initiative number.');if(!mp)return alert('Pick your character first.');try{await NETA.set(B()+'inits/'+mp,{v:Math.max(-10,Math.min(60,Math.round(v))),t:NETA.ts()})}catch(e){alert('Could not send. Check your connection and try again.')}}
+function shSave(){clearTimeout(shT);shT=setTimeout(()=>{const pid=myPid();if(!pid||!NETA)return;const g=k=>{const e=document.getElementById('sh_'+k);return e?e.value:''},o={pid,cls:g('cls'),rs:g('rs'),atk:g('atk'),inv:g('inv'),nt:g('nt'),u:Date.now()};['max','ac','sp','pp','dc'].forEach(k=>{const v=+g(k);if(g(k)!==''&&!isNaN(v))o[k]=v});NETA.set(B()+'sheets/'+pid,JSON.stringify(o)).then(()=>{SHM='Saved ✔'},()=>{SHM='Could not save'})},400)}
+function ptab(t){pTab=t;render()}
+function relC(pid){dlg('Release this character?','',()=>{NETA.remove(B()+'claimed/'+pid).catch(()=>alert('Could not release.'))},'Release')}
+function dmSheet(pid){const s=SH[pid]||{},p=S.party.find(x=>x.id==pid)||{},f=(k,l,t)=>`<label>${l}<input id=ds_${k} ${t?'type=number':''} value="${E(s[k]==null?'':s[k])}"></label>`,a=(k,l)=>`<label>${l}<textarea id=ds_${k} rows=3>${E(s[k]||'')}</textarea></label>`;dlg((p.name||'Character')+' – sheet',`<div class=g>${f('cls','Class & level')}${f('max','Max HP',1)}${f('ac','AC',1)}${f('sp','Speed',1)}${f('pp','Passive Perc.',1)}${f('dc','Spell DC',1)}</div>${f('rs','Resistances')}${a('atk','Attacks & spells')}${a('inv','Inventory')}${a('nt','Notes')}`,async()=>{const g=k=>document.getElementById('ds_'+k).value,o={...s,pid,cls:g('cls'),rs:g('rs'),atk:g('atk'),inv:g('inv'),nt:g('nt'),u:Date.now()};['max','ac','sp','pp','dc'].forEach(k=>{const v=+g(k);if(g(k)!==''&&!isNaN(v))o[k]=v;else delete o[k]});try{await NETA.set(B()+'sheets/'+pid,JSON.stringify(o))}catch(er){alert('Could not save.')}},'Save')}
+function pcont(){pdone=true;render()}
+/* ================= shared game (Firebase) ================= */
+function rid(n){const a='abcdefghijkmnpqrstuvwxyz23456789',b=new Uint8Array(n);crypto.getRandomValues(b);return[...b].map(x=>a[x%a.length]).join('')}
+async function mkGame(){
+if(GID)return;GID=rid(10);KEY=rid(24);GAME={g:GID,k:KEY};share=true;
+try{localStorage.setItem('rcl_game',JSON.stringify(GAME));localStorage.setItem('rcl_share','1')}catch(e){}
+try{history.replaceState(null,'','?g='+GID+'#dm='+KEY)}catch(e){}
+render();await netStart()}
+function cp(id){const e=document.getElementById(id);if(!e)return;if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(e.value).then(()=>alert('Copied.'),()=>e.select());else e.select()}
+function dmPush(){if(!NETA||!ISDM||!SYNC)return;clearTimeout(pushT);pushT=setTimeout(()=>{NETA.set('dm/'+GID,{j:JSON.stringify(S),t:LT,d:DEV}).catch(()=>{})},600)}
+function dmAdopt(r){try{const d=JSON.parse(r.j);if(!d||!d.party||!d.battles)return;S=d;S.tpl=S.tpl||{};S.enc=S.enc||{};LT=r.t;UN=[];prevS=JSON.stringify(S.cur);try{localStorage.setItem('rcl',r.j);localStorage.setItem('rcl_t',LT)}catch(e){}IDB.set(r.j);render()}catch(e){}}
+function applyInits(){if(!S.cur||!S.cur.rc)return;let ch=false;for(const pid in INITS){const e=INITS[pid];if(!e||INA[pid]===e.t)continue;INA[pid]=e.t;const c=S.cur.cs.find(x=>x.type=='pc'&&x.pid==pid),v=+e.v;if(!c||isNaN(v))continue;c.init=Math.max(-10,Math.min(60,Math.round(v)));c.rdy=true;ch=true}if(ch)sv()}
+async function netStart(){
+if(!window.FB_CONFIG||!GID||NETA)return;
+try{
+let A=window.__FAKE_FB;
+if(!A&&!window.FB_CONFIG.databaseURL){NETERR='config.js has no databaseURL. Create the Realtime Database first, then copy the config again.';render();return}
+if(!A){
+const v='https://www.gstatic.com/firebasejs/13.2.0/firebase-',[fa,fu,fd]=await Promise.all([import(v+'app.js'),import(v+'auth.js'),import(v+'database.js')]);
+const app=fa.initializeApp(window.FB_CONFIG),db=fd.getDatabase(app),cred=await fu.signInAnonymously(fu.getAuth(app));
+A={uid:cred.user.uid,set:(p,x)=>fd.set(fd.ref(db,p),x),remove:p=>fd.remove(fd.ref(db,p)),on:(p,cb)=>fd.onValue(fd.ref(db,p),s=>cb(s.val()),()=>{}),ts:()=>fd.serverTimestamp()}}
+UID=A.uid;
+if(KEY){
+await A.set('dmkeys/'+GID+'/'+KEY,true).catch(()=>{});
+try{await A.set('owners/'+GID+'/'+UID,KEY);ISDM=true}catch(e){NETERR='This device couldn’t register as the DM. This DM link doesn’t match this game, or the database rules haven’t been published yet.'}}
+NETA=A;const bp=B();
+const subs=()=>{
+A.on(bp+'live',v=>{let d=null;try{d=v&&JSON.parse(v.j)}catch(e){}P=d&&!d.off?d:null;if(mode=='pl')render()});
+A.on(bp+'party',v=>{try{PL=v?JSON.parse(v.j):[]}catch(e){PL=[]}render()});
+A.on(bp+'claimed',v=>{CL=v||{};render()});
+A.on(bp+'sheets',v=>{SH={};for(const k in v||{}){try{SH[k]=JSON.parse(v[k])}catch(e){}}if(ISDM)syncSheets();render()});
+if(ISDM)A.on(bp+'inits',v=>{INITS=v||{};applyInits()})};
+A.on('.info/connected',v=>{CONN=!!v;render()});
+/* the DM's own data syncs first, so an out-of-date device never overwrites a newer one */
+if(ISDM)A.on('dm/'+GID,r=>{if(!SYNC){SYNC=true;if(r&&r.t>LT)dmAdopt(r);else dmPush();pubParty();bc();subs();return}if(r&&r.d!=DEV&&r.t>LT){dmAdopt(r);pubParty();bc()}});
+else subs();
+render()
+}catch(e){const c=String(e&&(e.code||e.message)||'');NETERR='Couldn’t connect to the shared game. '+(/auth\//.test(c)?'Check that Anonymous sign-in is turned on in Firebase.':'Check your connection and reload.')+(c?' ('+c.slice(0,80)+')':'');render()}}
+function linksH(){
+if(!window.FB_CONFIG)return`<div class=card><h3>Sharing</h3><div class=mu>Sharing isn’t set up in this copy yet (config.js is missing). Everything else works on this device.</div></div>`;
+if(!GID)return`<div class=card><h3>Sharing</h3><div class=mu>Create a shared game to get a link for your players and to keep your own devices in sync.</div><button class=p onclick=mkGame()>Create shared game</button></div>`;
+const base=location.origin+location.pathname;
+return`<div class=card><h3>Sharing</h3><div class=mu>${NETERR?E(NETERR):NETA?(CONN?'Connected ✔':'Offline. Changes will sync when you’re back online.'):'Connecting…'}</div><label>Player link (send this to your party)</label><div class=r><input id=lk1 readonly value="${E(base+'?g='+GID)}" style="flex:1"><button onclick="cp('lk1')">Copy</button></div><label>Your DM link (keep it private; open it on your other devices)</label><div class=r><input id=lk2 readonly value="${E(base+'?g='+GID+'#dm='+KEY)}" style="flex:1"><button onclick="cp('lk2')">Copy</button></div></div>`}
+/* ================= views ================= */
+const bar=c=>`<div class=hp><i style="width:${Math.round(pct(c)*100)}%;background:${col(pct(c))}"></i></div>`;
+const chips=(c,dmv)=>(c.conds||c.cd||[]).map((k,i)=>`<span class=ch ${dmv?`onclick="ci('${c.id}',${i})"`:""}>${E(k.n)}${k.d!=null?":"+k.d:""}</span>`).join("");
+const dsH=c=>c.type!="pc"||c.hp>0?"":c.dead?`<div class=r><b>☠ Dead</b></div>`:c.stab?`<div class=r><b>Stable</b></div>`:`<div class=r><span>Death saves ✓${c.ok||0} ✗${c.fl||0}</span><span><button onclick="ds('${c.id}','s')">✓</button> <button onclick="ds('${c.id}','f')">✗</button> <button onclick="ds('${c.id}','20')">Nat 20</button> <button onclick="ds('${c.id}','1')">Nat 1</button></span></div>`;
+function card(c){
+const id=c.id,gone=slain(c);
+return`<div class="card ${S.cur.turn==id?"turn":""} ${skp(c)?"dn":""}"><div class=r><b>${E(c.name)}</b><span class=mu>AC ${c.ac}${c.ir?` · 🎲${c.ir.r}${sg(c.ir.b)}`:''}</span><span><label style="margin:0;display:inline">Init <input type=number value=${c.init} onchange="setI('${id}',this.value)"></label> <label style="margin:0;display:inline">Dex <input type=number value=${c.dx||0} onchange="setD('${id}',this.value)" style="width:56px"></label></span></div>${bar(c)}${dsH(c)}<div class=r><span>${c.hp}/${c.max}${c.temp?` <span class=mu>+${c.temp} temp</span>`:""}</span><span>${chips(c,1)}</span></div>`
++(c.lr!=null?`<div class=r><span class=mu>Legendary Resistance: ${c.lr}</span><button onclick=lr('${id}')>Use one</button></div>`:'')
++(c.note?`<div class=mu>📝 ${E(c.note)}</div>`:'')
++(c.lm?`<div class=r><span class=mu>Legendary actions: ${c.la}/${c.lm} (reset each round)</span><button onclick=la('${id}')>Use one</button></div>`:'')
++`<div class=r>${gone?'':`<button class=p onclick="dm('${id}')">Act</button>`}<button onclick=inf('${id}')>Info</button>${gone?'':`<button onclick="th('${id}')">Temp HP</button><button onclick="cd('${id}')">Cond</button>`}<button onclick="rm('${id}')">✕</button></div></div>`}
+function lineupH(){const s=srt();let i=s.findIndex(c=>c.id==S.cur.turn);if(i<0)i=0;const r=s.slice(i).concat(s.slice(0,i)),a=r.filter(c=>!skp(c)),d=r.filter(skp);return a.map(card).join("")+(d.length?`<h3 style="margin-top:18px">☠ Down &amp; out</h3>`+d.map(card).join(""):"")}
+function combat(){
+const chest=S.chest?`<div class=card><div class=r><b>🧰 Loot (${S.chest.items.length})${S.chest.open?' · open':''}</b><button onclick=lootD()>View / Open</button></div></div>`:'';
+if(!S.cur)return chest+`<div class=card><h3>Start a battle</h3><div class=g>${Object.keys(EN()).map(k=>`<button onclick="newB(this.dataset.k)" data-k="${E(k)}">${E(k)}</button>`).join("")}</div><div class=r><button onclick="newB('')">Empty battle</button></div></div>`;
+const c=S.cur,t=c.cs.find(x=>x.id==c.turn),inIds=c.cs.map(x=>x.pid),free=S.party.filter(p=>!inIds.includes(p.id)),pcs=c.cs.filter(x=>x.type=='pc');
+const ready=c.rc?`<div class=card style='border-color:#c9a24a'><h3>⚔ Ready check · ${pcs.filter(x=>x.rdy).length}/${pcs.length}</h3>${pcs.map(x=>`<div class=r><span>${x.rdy?'<b style="color:#3fa34d">✔</b>':'<span class=mu>⏳</span>'} ${E(x.name)}</span><span class=mu>${x.rdy?'Init '+x.init:'waiting…'}</span></div>`).join('')}<div class=r><button class=p onclick=beginB()>Begin battle</button><button onclick=cancelRC()>Cancel</button></div><div class=mu>Players enter their own totals in Player view. You can also type a player’s Init on their card.</div></div>`:'';
+const lair=c.cs.some(x=>(PF[x.base]||{}).lair)?`<div class='card mu'>🏰 Lair actions on initiative 20 if fighting in the lair. Legendary actions at the end of other creatures’ turns.</div>`:'';
+const call=!c.rc&&!c.turn&&pcs.length?`<button class=p onclick=startRC()>⚔ Call for initiative</button>`:'';
+const roll=!c.turn?`<button onclick=rollE()>🎲 Roll enemy initiative</button>`:'';
+return ready+chest+lair+`<div class=card><div class=r><b>Round ${c.round}</b><span class=mu>${t?"Turn: "+E(t.name):"Set initiative, then Next Turn"}</span></div><div class=r>${call}${roll}<button class=p onclick=nx()>Next Turn</button><button onclick="dm('env')">Environment</button><button onclick=undo()>↶ Undo</button><button onclick=endB()>End &amp; Save</button></div></div>${lineupH()}<div class=card><h3>Add to fight</h3>${free.map(p=>`<div class=r><span>${E(p.name)}</span><span>HP <input type=number id="h${p.id}" value=${p.max}> <button onclick="addPC('${p.id}')">Add</button></span></div>`).join("")||'<div class=mu>All party members are in (or add some on the Party tab).</div>'}<div class=r><select id=et style="flex:1">${Object.keys(T()).map(k=>`<option>${E(k)}</option>`).join("")}</select><button onclick="addEn($('#et').value)">Add enemy</button></div></div>`}
+function modalH(){
+const c=S.cur,s=modal=="env"?{name:"Environment / hazard"}:gc(modal),p=modal!="env"&&PF[s.base];
+return`<div class=ov><div class=card><h3>${E(s.name)} acts</h3>${p?`<div class=mu style='margin-bottom:6px'>${E(p.t)}</div>`:''}<label>Action / spell<input id=mx list=al oninput=fillT() autocomplete=off placeholder="Type to search or write your own"></label><datalist id=al>${Object.values(AC).map(a=>`<option value="${E(a.n)}">`).join("")}</datalist><label>Target(s)</label>${c.cs.filter(x=>!slain(x)).map(x=>`<label style="display:flex;gap:8px;align-items:center;color:var(--tx)"><input type=checkbox class=mt2 value=${x.id}> ${E(x.name)} <span class=mu>${x.hp}/${x.max}</span><select class=mm data-i=${x.id} style='width:auto;padding:4px'><option value=1>Full</option><option value=.5>½</option><option value=2>×2</option><option value=0>0</option></select></label>`).join("")}<div class=g><label>Amount (each)<input type=number inputmode=numeric id=ma></label><label>Type (Healing heals)<select id=mt>${TYPES.map(x=>`<option>${x}</option>`).join("")}</select></label></div><label><input type=checkbox id=mc> Critical hit</label><div class=r><button class=p onclick=ap()>Apply</button><button onclick=cm()>Cancel</button></div></div></div>`}
+function infH(){
+const c=gc(info),p=PF[c.base]||{},pc=S.party.find(x=>x.id==c.pid),st=pc&&pst(pc);
+return`<div class=ov><div class=card><h3>${E(c.name)}</h3>${st?`<div class=mu style='margin-bottom:6px'>${st}</div>`:''}${p.t?`<p>${E(p.t)}</p>`:'<p class=mu>No profile. Use notes below.</p>'}<label>DM notes<textarea id=nt rows=3>${E(c.note||'')}</textarea></label><div class=r><button class=p onclick=svN()>Save</button><button onclick='info=null;render()'>Close</button></div></div></div>`}
+function vicH(v,btn){return`<div class=ov style='align-items:flex-start'><div class=card style='text-align:center;max-width:460px;background:radial-gradient(circle at 50% 0,#4a3a12,#140d0f 65%);border-color:#c9a24a'><div style='font-size:56px;animation:dr .8s both'>⚔️</div><h1 style='font-size:34px;color:#e0b43c;text-shadow:0 0 18px #c43a44;animation:vp 1s both'>VICTORY</h1><div class=mu>${v.rounds} round${v.rounds==1?'':'s'} · ${v.en} foe${v.en==1?'':'s'} defeated</div>${v.rows.map(r=>`<div class=r style='border-top:1px solid var(--ln);padding:6px 0'><b>${E(r.n)}</b><span class=mu>${r.d} dmg · ${r.h} healed · ${r.k} kills${r.hi?' · best hit '+r.hi:''}${r.c?' · '+r.c+' crits':''}</span></div>`).join('')||'<div class=mu>No attacks were logged.</div>'}${btn}</div></div>`}
+function prep(){
+const ed=ED&&S.enc&&S.enc[ED]?ED:null,cnt={};
+if(ed)S.enc[ed].forEach(([t,n])=>{cnt[t]=n});
+const lt=ed?((S.loot||{})[ed]||[]).map(x=>x.n+(x.d?' | '+x.d:'')).join('\n'):'';
+return`<div class=card><h3>Custom enemy</h3><div class=r><input id=tn placeholder=Name style="flex:2"><input id=th type=number placeholder=HP><input id=ta type=number placeholder=AC><input id=ti type=number placeholder='Init bonus'></div><button class=p onclick=addT()>Save enemy</button><div class=mu>Enter stats from your book once; they’re kept for every battle.</div></div>`
++`<div class=card><h3>${ed?`Editing: ${E(ed)}`:'Build an encounter'}</h3>${ed?`<input id=en value="${E(ed)}" placeholder="Encounter name">`:`<input id=en placeholder="e.g. S1 – Death House: Cellar">`}<div class=g style="margin-top:8px">${Object.keys(T()).map(k=>`<label style="display:flex;justify-content:space-between;align-items:center;color:var(--tx)">${E(k)} <input type=number class=ec data-t="${E(k)}" min=0 value=${cnt[k]||0}></label>`).join("")}</div><label>Loot (one per line: Item | description)<textarea id=lt rows=3 placeholder='Potion of Healing | Heals 2d4+2'>${E(lt)}</textarea></label><div class=r><input id=li list=ldl placeholder='Search items or "Scroll of Fireball"' style='flex:1'><button onclick=addLoot()>Add</button><button onclick=fillLoot()>Autofill</button></div><datalist id=ldl>${LL.map(x=>`<option value="${E(x)}">`).join('')}</datalist><div class=mu>Add puts an item and a short description on its own line. Autofill completes any line that has a name but no description.</div>${ed?`<div class=r><button class=p onclick=saveE()>Save changes</button><button onclick=cancelE()>Cancel</button></div>`:`<button class=p onclick=saveE()>Save encounter</button>`}</div>`
++Object.entries(S.enc||{}).map(([k,v])=>`<div class=card><div class=r><b>${E(k)}</b><span><button onclick="editE(this.dataset.k)" data-k="${E(k)}">Edit</button> <button onclick="delE(this.dataset.k)" data-k="${E(k)}">Delete</button></span></div><div class=mu>${v.map(x=>x[1]+"× "+E(x[0])).join(", ")}</div></div>`).join("")}
+function party(){
+const on=NETA&&ISDM,rows=on?S.party.map(p=>{const u=CL[p.id];return`<div class=r><span><b>${E(p.name)}</b> <span class=mu>• ${u?'claimed':'unclaimed'}</span></span><span><button onclick="dmSheet('${p.id}')">Sheet</button>${u?` <button onclick="relC('${p.id}')">Release</button>`:''}</span></div>`}).join(''):'';
+return`<div class=card><h3>Add character</h3><div class=r><input id=pn placeholder=Name style="flex:2"><input id=pm type=number placeholder="Max HP"><input id=pa type=number placeholder=AC></div><div class=r><input id=pp type=number placeholder='Passive Perc.'><input id=pd type=number placeholder='Spell DC'><input id=ps type=number placeholder='Speed'><input id=pr placeholder='Resist./notes'></div><button class=p onclick=addP()>Add</button></div>`
++S.party.map(p=>{const s=pst(p);return`<div class=card><div class=r><span><b>${E(p.name)}</b> <span class=mu>${p.max} HP · AC ${p.ac}</span>${s?`<div class=mu>${s}</div>`:''}</span><span><button onclick="edP('${p.id}')">Edit</button> <button onclick="rmP('${p.id}')">✕</button></span></div></div>`}).join("")
++linksH()
++(on?`<div class=card><h3>Players &amp; sheets</h3>${rows||'<div class=mu>Add characters first.</div>'}<div class=mu>Players claim a character from their phone. Their sheet stats update your party automatically.</div></div>`:'')
++`<div class=card><h3>Backup</h3><textarea id=bk rows=4 placeholder="Export fills this box; paste a backup here to import"></textarea><div class=r><button onclick=exp()>Export JSON</button><button onclick=imp()>Import JSON</button></div></div>`}
+function hist(){if(!S.battles.length)return`<div class="card mu">No saved battles yet.</div>`;return[...S.battles].reverse().map(b=>{const a=agg([b.log]);return`<div class=card><div class=r><b>${new Date(b.date).toLocaleDateString()}</b><span class=mu>${b.rounds} rounds · ${b.log.length} events</span></div>${Object.entries(a).map(([n,s])=>`<div class=mu>${E(n)}: ${s.dmg} dmg · ${s.heal} healed · ${s.k} kills</div>`).join("")}<div class=r><button onclick="tlog('${b.id}')">${LOGS[b.id]?"Hide":"Full"} log</button><button onclick="delB('${b.id}')">Delete</button></div>${LOGS[b.id]?b.log.map(e=>`<pre>R${e.r} ${E(e.src)} → ${E(e.tgt)}: ${e.amt} ${e.ty}${e.crit?" (crit)":""}${e.act?" · "+E(e.act):""}${e.kill?" ☠":""}</pre>`).join(""):""}</div>`}).join("")}
+function life(){const a=agg(S.battles.map(b=>b.log)),k=Object.keys(a);if(!k.length)return`<div class="card mu">Save a battle to see lifetime stats.</div>`;return k.sort((x,y)=>a[y].dmg-a[x].dmg).map(n=>{const s=a[n];return`<div class=card><b>${E(n)}</b><div class=g><span>Damage: ${s.dmg}</span><span>Healing: ${s.heal}</span><span>Kills: ${s.k}</span><span>Spells cast: ${s.sp}</span><span>Highest hit: ${s.hi}</span><span>Crits: ${s.cr}</span></div><div class=mu>${Object.entries(s.by).map(([t,v])=>t+" "+v).join(" · ")||"No damage dealt"}</div></div>`}).join("")}
+function chestH(c){const an=!seenC;setTimeout(()=>{seenC=true},60);return`<div class=card style='text-align:center'><svg viewBox='0 0 120 90' width=150><g style='transform-origin:15px 42px;${an?'animation:lid .9s ease forwards':'transform:rotate(-55deg)'}'><rect x=15 y=20 width=90 height=22 rx=6 fill=#6b3b1e stroke=#c9a24a stroke-width=3 /></g><rect x=15 y=40 width=90 height=40 rx=4 fill=#5a2f17 stroke=#c9a24a stroke-width=3 /><rect x=52 y=36 width=16 height=14 rx=2 fill=#c9a24a /><ellipse cx=60 cy=41 rx=40 ry=7 fill=#ffd770 style='opacity:.85;${an?'animation:gl 1.2s':''}' /></svg><h3>Treasure!</h3>${c.items.map((x,i)=>`<div class=card style='text-align:left;cursor:pointer;${an?`animation:fi .5s both;animation-delay:${.9+i*.2}s`:''}' onclick=tl(${i})><b>${E(x.n)}</b>${LO[i]?`<div class=mu style='margin-top:4px'>${E(x.d||'No further details.')}</div>`:'<span class=mu> · tap for details</span>'}</div>`).join('')}</div>`}
+function claimUI(){const o=PL.filter(x=>!CL[x.id]||CL[x.id]==UID);return`<label>Who are you playing?<select onchange='pme(this.value)'><option value=''>Choose your character</option>${o.map(x=>`<option value="${x.id}">${E(x.n)}</option>`).join('')}</select></label>${PL.length?'':'<div class=mu>Waiting for the DM to set up the party…</div>'}`}
+function readyH(){const rc=P.rc,mp=myPid(),me=rc.find(x=>x.id==mp),pick=mp?`<div class=r><span>Playing <b>${E(((rc.find(x=>x.id==mp)||PL.find(x=>x.id==mp))||{}).n||'')}</b></span><button onclick=unclaim()>Not me</button></div>`:claimUI();return`<div class=card style='border-color:#c9a24a;text-align:center'><h3>⚔ Roll for initiative!</h3><div class=mu>The DM has called for initiative.</div></div><div class=card>${pick}<div class=r><input id=pi type=number inputmode=numeric placeholder='Your initiative total' value="${E(PI)}" oninput='PI=this.value' style='flex:1'><button class=p onclick=psub()>Submit</button></div>${me&&me.ok?'<div style="color:#3fa34d">✔ Locked in. You can resubmit to change it.</div>':''}</div><div class=card><h3>Party</h3>${rc.map(x=>`<div class=r><span>${x.ok?'<b style="color:#3fa34d">✔</b>':'<span class=mu>⏳</span>'} ${E(x.n)}</span><span class=mu>${x.ok?'Ready':'Waiting…'}</span></div>`).join('')}</div>`}
+const fld=(k,l,v,t)=>`<label>${l}<input id=sh_${k} ${t?'type=number inputmode=numeric':''} value="${E(v==null?'':v)}" onchange=shSave()></label>`,ar=(k,l,v)=>`<label>${l}<textarea id=sh_${k} rows=3 onchange=shSave()>${E(v||'')}</textarea></label>`;
+function sheetH(){if(!NETA)return`<div class='card mu'>${NETERR?E(NETERR):'Character sheets need the shared game. Check your connection.'}</div>`;const pid=myPid();if(!pid)return`<div class=card><h3>Your character</h3>${claimUI()}</div>`;const s=SH[pid]||{},n=((PL.find(x=>x.id==pid))||{}).n||'Your character';return`<div class=card><h3>${E(n)}</h3><div class=mu>Your sheet. The DM can see and edit it, and your stats feed the combat tracker.</div><div class=g>${fld('cls','Class & level',s.cls)}${fld('max','Max HP',s.max,1)}${fld('ac','AC',s.ac,1)}${fld('sp','Speed (ft)',s.sp,1)}${fld('pp','Passive Perception',s.pp,1)}${fld('dc','Spell save DC',s.dc,1)}</div>${fld('rs','Resistances / immunities',s.rs)}${ar('atk','Attacks & spells',s.atk)}${ar('inv','Inventory',s.inv)}${ar('nt','Notes',s.nt)}<div class=r><span class=mu>${E(SHM)}</span><button onclick=unclaim()>Switch character</button></div></div>`}
+function battleList(){return`<div class=card><b>Round ${P.round}</b></div>${P.cs.map(c=>`<div class="card ${P.turn==c.id?"turn":""}"><div class=r><b>${E(c.n)}</b><span>${c.pc?`${c.hp}/${c.max}${c.t?" +"+c.t:""}`:`<b>${c.st}</b>`}</span></div>${bar(c.pc?c:{hp:c.st=="Healthy"?1:c.st=="Bloodied"?.4:c.st=="Near death"?.1:0,max:1})}<div>${chips(c,0)}</div></div>`).join("")}${Object.keys(P.lb).length?`<div class=card><h3>This battle</h3>${Object.entries(P.lb).map(([n,v])=>`<div class=r><span>${E(n)}</span><span class=mu>${v[0]} dmg · ${v[1]} healed · ${v[2]} kills</span></div>`).join("")}</div>`:""}`}
+function player(){
+const nav=`<div class=r style='justify-content:center;gap:8px'><button class="${pTab=='b'?'p':''}" onclick="ptab('b')">Battle${P&&P.rc?' ❗':''}</button><button class="${pTab=='s'?'p':''}" onclick="ptab('s')">My sheet</button></div>`;
+if(pTab=='s')return nav+sheetH();
+const o=P&&P.chest&&P.chest.open,ch=o?chestH(P.chest):'';
+if(P&&P.rc)return nav+ch+readyH();
+if(!o){seenC=false;LO={}}
+if(!P)return nav+`<div class="card mu" style='text-align:center;padding:30px'>${NETERR?E(NETERR):!window.FB_CONFIG?'Live view isn’t set up in this copy yet.':!GID?'Create a shared game on the Party tab to use the live view.':NETA?'🕯️ Waiting for the DM to start sharing…':'Connecting…'}</div>`;
+if(!P.victory&&!P.none)pdone=false;
+if(P.victory&&!pdone)return nav+ch+vicH(P.victory,`<div class=r style='justify-content:center;margin-top:12px'><button class=p onclick=pcont()>Continue</button></div>`);
+if(P.none||P.victory)return nav+ch+`<div class='card mu' style='text-align:center;padding:30px'>🕯️ Waiting for the next battle…</div>`;
+return nav+ch+battleList()}
+function render(){
+const a=document.activeElement,pl=mode=="pl";
+/* don't redraw under a player who is typing */
+if(pl&&a&&a.id&&a.id.indexOf('sh_')==0)return;
+const k=P&&P.rc?JSON.stringify(P.rc):'';
+if(pl&&a&&a.id=='pi'&&k===RCK)return;
+RCK=k;
+if(pl&&P&&P.cs){if(PP&&PP.cs){const d=P.cs.filter(c=>{const o=!c.pc&&c.st=='Down'&&PP.cs.find(x=>x.id==c.id);return o&&o.st!='Down'});if(d.length)slay(d.map(c=>({name:c.n})))}PP=P}
+let h=`<div class=r><h1>🦇 Ravenloft Combat Ledger</h1><span>${pl?"":`<button onclick=tg()>${share&&GID?"● Sharing":"Share live"}</button> `}${pl&&ISPL?"":`<button onclick=md()>${pl?"DM view":"Player view"}</button>`}</span></div>`
++(pl?player():({combat,prep,party,hist,life})[tab]())
++(modal&&S.cur&&(modal=="env"||gc(modal))?modalH():"")
++(pl?"":`<div class=tabs>${[["combat","Combat"],["prep","Prep"],["party","Party"],["hist","History"],["life","Stats"]].map(([k,v])=>`<button class="${tab==k?"on":""}" onclick="tab='${k}';render()">${v}</button>`).join("")}</div>`);
+if(info&&S.cur&&gc(info))h+=infH();
+if(dg)h+=dgH();
+if(!pl&&S.cur&&S.cur.won&&!VD[S.cur.id])h+=vicH(vic(),`<div class=r style='justify-content:center;margin-top:12px'><button onclick=vrev()>Review battle</button><button class=p onclick=goHome()>Save &amp; go home</button></div>`);
+$("#app").innerHTML=h}
+/* ================= start-up ================= */
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+if(!ISPL)IDB.get().then(v=>{let d;try{d=v&&JSON.parse(v)}catch(e){}if(d&&!S.party.length&&!S.battles.length&&!S.cur&&(d.party.length||d.battles.length||d.cur)){S=d;S.tpl=S.tpl||{};S.enc=S.enc||{};prevS=JSON.stringify(S.cur);render()}else IDB.set(JSON.stringify(S))});
+render();
+netStart();
+</script></body></html>

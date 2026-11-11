@@ -2,8 +2,8 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Combat Ledger">
-<meta name="theme-color" content="#0d0708"><link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Crimson+Text&display=swap" rel="stylesheet"><title>Ravenloft Combat Ledger</title>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Critical Cowboy">
+<meta name="theme-color" content="#0d0708"><link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Crimson+Text&display=swap" rel="stylesheet"><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" href="icon-192.png"><link rel="manifest" href="manifest.json"><title>Critical Cowboy</title>
 <style>
 :root{color-scheme:dark;--bg:#0f1115;--cd:#1a1d24;--ln:#2c313c;--tx:#ece9e3;--mu:#8d93a0;--ac:#a8242c;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -285,7 +285,7 @@ const k=P&&P.rc?JSON.stringify(P.rc):'';
 if(pl&&a&&a.id=='pi'&&k===RCK)return;
 RCK=k;
 if(pl&&P&&P.cs){if(PP&&PP.cs){const d=P.cs.filter(c=>{const o=!c.pc&&c.st=='Down'&&PP.cs.find(x=>x.id==c.id);return o&&o.st!='Down'});if(d.length)slay(d.map(c=>({name:c.n})))}PP=P}
-let h=`<div class=r><h1>🦇 Ravenloft Combat Ledger</h1><span>${pl?"":`<button onclick=tg()>${share&&GID?"● Sharing":"Share live"}</button> `}${pl&&ISPL?"":`<button onclick=md()>${pl?"DM view":"Player view"}</button>`}</span></div>`
+let h=`<div class=r><h1><img src="logo-96.png" alt="" style="width:34px;height:34px;border-radius:50%;vertical-align:middle;margin-right:8px">Critical Cowboy</h1><span>${pl?"":`<button onclick=tg()>${share&&GID?"● Sharing":"Share live"}</button> `}${pl&&ISPL?"":`<button onclick=md()>${pl?"DM view":"Player view"}</button>`}</span></div>`
 +(pl?player():({combat,prep,party,hist,life})[tab]())
 +(modal&&S.cur&&(modal=="env"||gc(modal))?modalH():"")
 +(pl?"":`<div class=tabs>${[["combat","Combat"],["prep","Prep"],["party","Party"],["hist","History"],["life","Stats"]].map(([k,v])=>`<button class="${tab==k?"on":""}" onclick="tab='${k}';render()">${v}</button>`).join("")}</div>`);

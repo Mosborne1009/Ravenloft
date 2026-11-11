@@ -22,7 +22,7 @@ input[type=number]{width:70px}input[type=text],input:not([type]),select,textarea
 body{background:radial-gradient(ellipse at 50% -10%,#3a1015 0,#0d0708 55%) fixed;font-family:"Crimson Text",Georgia,serif;font-size:17px}
 h1,h3,b,.tabs button,button.p{font-family:Cinzel,Georgia,serif;letter-spacing:.04em}
 h1{color:#d9c7a3;font-size:18px;text-shadow:0 0 12px #8b1a22}
-.dh{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;padding:2px 8px 2px 0;color:#c9a24a}.dgg{opacity:.55}.dtg{box-shadow:0 -3px 0 #c9a24a}.dtg.dta{box-shadow:0 3px 0 #c9a24a}
+.dh{display:inline-block;min-width:30px;min-height:30px;line-height:30px;text-align:center;font-size:20px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;padding:2px 8px 2px 0;color:#c9a24a}.dgg{opacity:.55}.dtg{box-shadow:0 -3px 0 #c9a24a}.dtg.dta{box-shadow:0 3px 0 #c9a24a}
 .card{background:linear-gradient(#1b1214,#140d0f);border-color:#4a2a2e}.card.turn{border-color:#c43a44;box-shadow:0 0 14px #8b1a2299}
 button,input,select,textarea{background:#241518;border-color:#4a2a2e}button.p{background:#8b1a22;border-color:#b3333c}
 .tabs{background:#120a0c;border-top-color:#4a2a2e}.tabs button{padding:14px 2px;font-size:13px}.tabs button.on{border-top-color:#c43a44;color:#e8d9b8}
@@ -263,7 +263,7 @@ function reorder(xid,tid,after){const c=S.cur,L0=srt().filter(x=>!skp(x)),n=L0.l
 document.addEventListener('pointerdown',e=>{const h=e.target.closest&&e.target.closest('.dh');if(!h)return;e.preventDefault();D={id:h.dataset.h,t:null,a:false,y:e.clientY};const cd=h.closest('[data-cid]');cd&&cd.classList.add('dgg');try{h.setPointerCapture(e.pointerId)}catch(_){}tm=setInterval(()=>{if(!D)return;if(D.y<70)scrollBy(0,-12);else if(D.y>innerHeight-70)scrollBy(0,12)},16)});
 document.addEventListener('pointermove',e=>{if(!D)return;D.y=e.clientY;const el=document.elementFromPoint(e.clientX,e.clientY),cd=el&&el.closest&&el.closest('[data-cid]');document.querySelectorAll('.dtg,.dta').forEach(q=>q.classList.remove('dtg','dta'));D.t=null;if(cd&&cd.dataset.cid!=D.id&&cd.querySelector('.dh')){const r=cd.getBoundingClientRect();D.a=e.clientY>r.top+r.height/2;D.t=cd.dataset.cid;cd.classList.add('dtg');if(D.a)cd.classList.add('dta')}});
 const end=ok=>{if(!D)return;clearInterval(tm);const d=D;D=null;clr();if(ok&&d.t)reorder(d.id,d.t,d.a)};
-document.addEventListener('pointerup',()=>end(true));document.addEventListener('pointercancel',()=>end(false))})();
+document.addEventListener('touchmove',e=>{if(D)e.preventDefault()},{passive:false});document.addEventListener('pointerup',()=>end(true));document.addEventListener('pointercancel',()=>end(false))})();
 function dsg(id){const c=gc(id);c.conds=c.conds.filter(k=>k.n!='Disengaged');c.conds.push({n:'Disengaged',d:1,s:c.name});sv()}
 function flee(id){dlg('Flee the fight?','<div class=mu>They leave combat and are skipped. Use Return to bring them back.</div>',()=>{gc(id).fled=1;sv()},'Flee')}
 function rtn(id){gc(id).fled=0;sv()}

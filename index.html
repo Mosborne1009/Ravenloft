@@ -106,7 +106,7 @@ function vic(){const c=S.cur,pcs=new Set(c.cs.filter(x=>x.type=='pc').map(x=>x.n
 function bc(){
 if(!NETA||!ISDM||!SYNC)return;let d;
 if(!share)d={off:1};
-else{d=S.cur?snap():{none:1};d.chest=null;d.victory=S.cur&&S.cur.won?vic():null;d.rc=S.cur&&S.cur.rc?S.cur.cs.filter(c=>c.type=='pc').map(c=>({id:c.pid||c.id,n:c.name,ok:!!c.rdy})):null}
+else{d=S.cur?snap():{none:1};{const nm=new Set(S.party.map(p=>p.name)),a=agg(S.battles.map(b=>b.log).concat(S.cur?[S.cur.log]:[])),o={};for(const k in a)if(nm.has(k))o[k]=a[k];d.ls=o}d.chest=null;d.victory=S.cur&&S.cur.won?vic():null;d.rc=S.cur&&S.cur.rc?S.cur.cs.filter(c=>c.type=='pc').map(c=>({id:c.pid||c.id,n:c.name,ok:!!c.rdy})):null}
 const j=JSON.stringify(d);if(j===LIVEJ)return;LIVEJ=j;NETA.set(B()+'live',{j}).catch(()=>{LIVEJ=''})}
 function tg(){if(!GID)return alert(window.FB_CONFIG?'Create a shared game on the Party tab first.':'Sharing isn’t set up in this copy yet.');share=!share;try{localStorage.setItem('rcl_share',share?'1':'0')}catch(e){}bc();render()}
 function md(){mode=mode=="dm"?"pl":"dm";render()}
@@ -309,9 +309,17 @@ const waitH=m=>`<div class=card style='text-align:center;padding:20px 10px'><div
 const fld=(k,l,v,t)=>`<label>${l}<input id=sh_${k} ${t?'type=number inputmode=numeric':''} value="${E(v==null?'':v)}" onchange=shSave()></label>`,ar=(k,l,v)=>`<label>${l}<textarea id=sh_${k} rows=3 onchange=shSave()>${E(v||'')}</textarea></label>`;
 function sheetH(){if(!NETA)return`<div class='card mu'>${NETERR?E(NETERR):'Character sheets need the shared game. Check your connection.'}</div>`;const pid=myPid();if(!pid)return`<div class=card><h3>Your character</h3>${claimUI()}</div>`;const s=SH[pid]||{},n=((PL.find(x=>x.id==pid))||{}).n||'Your character';return`<div class=card><h3>${E(n)}</h3><div class=mu>Your sheet. The DM can see and edit it, and your stats feed the combat tracker.</div><div class=g>${fld('cls','Class',s.cls)}${fld('lvl','Level',s.lvl,1)}${fld('max','Max HP',s.max,1)}${fld('ac','AC',s.ac,1)}${fld('sp','Speed (ft)',s.sp,1)}${fld('pp','Passive Perception',s.pp,1)}${fld('dc','Spell save DC',s.dc,1)}</div>${fld('rs','Resistances / immunities',s.rs)}${ar('atk','Attacks & spells',s.atk)}${ar('inv','Inventory',s.inv)}${ar('nt','Notes',s.nt)}<div class=r><span class=mu>${E(SHM)}</span><button onclick=unclaim()>Switch character</button></div></div>`}
 function battleList(){return`<div class=card><b>Round ${P.round}</b></div>${P.cs.map(c=>`<div class="card ${P.turn==c.id?"turn":""}"><div class=r><b>${E(c.n)}</b><span>${c.pc?`${c.hp}/${c.max}${c.t?" +"+c.t:""}`:`<b>${c.st}</b>`}</span></div>${bar(c.pc?c:{hp:c.st=="Healthy"?1:c.st=="Bloodied"?.4:c.st=="Near death"?.1:0,max:1})}<div>${chips(c,0)}</div></div>`).join("")}${Object.keys(P.lb).length?`<div class=card><h3>This battle</h3>${Object.entries(P.lb).map(([n,v])=>`<div class=r><span>${E(n)}</span><span class=mu>${v[0]} dmg · ${v[1]} healed · ${v[2]} kills</span></div>`).join("")}</div>`:""}`}
+function statsH(){const mp=myPid(),n=mp?((PL.find(x=>x.id==mp))||{}).n:'';const L=(P&&P.ls)||{};
+if(!P)return`<div class="card mu" style='text-align:center;padding:24px'>Stats show up once the DM is sharing the game.</div>`;
+const blk=(k,s,me)=>`<div class=card${me?" style='border-color:#c9a24a'":''}><b>${E(k)}${me?' (you)':''}</b><div class=g><span>Damage: ${s.dmg}</span><span>Healing: ${s.heal}</span><span>Kills: ${s.k}</span><span>Spells cast: ${s.sp}</span><span>Highest hit: ${s.hi}</span><span>Crits: ${s.cr}</span></div><div class=mu>${Object.entries(s.by||{}).map(([t,v])=>t+' '+v).join(' · ')||'No damage dealt yet'}</div></div>`;
+const ks=Object.keys(L).sort((a,b)=>L[b].dmg-L[a].dmg);
+let h=n?(L[n]?blk(n,L[n],1):`<div class="card mu">No stats for ${E(n)} yet. They appear after your first attack, spell or heal.</div>`):`<div class=card><h3>Which character are you?</h3>${claimUI()}</div>`;
+if(ks.filter(k=>k!=n).length)h+=`<h3 style='margin-top:14px'>Party</h3>`+ks.filter(k=>k!=n).map(k=>blk(k,L[k],0)).join('');
+return h+`<div class=mu style='text-align:center'>Across every battle so far, including the current one.</div>`}
 function player(){
-const nav=`<div class=r style='justify-content:center;gap:8px'><button class="${pTab=='b'?'p':''}" onclick="ptab('b')">Battle${P&&P.rc?' ❗':''}</button><button class="${pTab=='s'?'p':''}" onclick="ptab('s')">My sheet</button></div>`;
+const nav=`<div class=r style='justify-content:center;gap:8px'><button class="${pTab=='b'?'p':''}" onclick="ptab('b')">Battle${P&&P.rc?' ❗':''}</button><button class="${pTab=='s'?'p':''}" onclick="ptab('s')">My sheet</button><button class="${pTab=='t'?'p':''}" onclick="ptab('t')">My stats</button></div>`;
 if(pTab=='s')return nav+sheetH();
+if(pTab=='t')return nav+statsH();
 const o=false,ch='';
 if(P&&P.rc)return nav+ch+readyH();
 if(!o){seenC=false;LO={}}

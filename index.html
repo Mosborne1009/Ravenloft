@@ -67,7 +67,7 @@ S.tpl=S.tpl||{};S.enc=S.enc||{};
 const QS=new URLSearchParams(location.search),HK=(location.hash.match(/dm=([\w-]+)/)||[])[1];
 let GAME=null;try{GAME=JSON.parse(localStorage.getItem('rcl_game'))}catch(e){}
 let GID=QS.get('g')||(GAME&&GAME.g)||null;if(GID&&!/^[\w-]{4,40}$/.test(GID))GID=null;
-let KEY=GID?(HK||(GAME&&GAME.g==GID?GAME.k:null)||null):null;
+let KEY=GID?(QS.get('p')?null:(HK||(GAME&&GAME.g==GID?GAME.k:null)||null)):null;
 if(GID&&KEY){GAME={g:GID,k:KEY};try{localStorage.setItem('rcl_game',JSON.stringify(GAME))}catch(e){}}
 const ISPL=!!GID&&!KEY;
 let ET=null;let tab="combat",mode=ISPL?"pl":"dm",share=false,P=null,PP=null,modal=null,info=null,dg=null,ED=null,LOGS={},RCK='';
@@ -252,7 +252,7 @@ function linksH(){
 if(!window.FB_CONFIG)return`<div class=card><h3>Sharing</h3><div class=mu>Sharing isn’t set up in this copy yet (config.js is missing). Everything else works on this device.</div></div>`;
 if(!GID)return`<div class=card><h3>Sharing</h3><div class=mu>Create a shared game to get a link for your players and to keep your own devices in sync.</div><button class=p onclick=mkGame()>Create shared game</button></div>`;
 const base=location.origin+location.pathname;
-return`<div class=card><h3>Sharing</h3><div class=mu>${NETERR?E(NETERR):NETA?(CONN?'Connected ✔':'Offline. Changes will sync when you’re back online.'):'Connecting…'}</div><label>Player link (send this to your party)</label><div class=r><input id=lk1 readonly value="${E(base+'?g='+GID)}" style="flex:1"><button onclick="cp('lk1')">Copy</button></div><label>Your DM link (keep it private; open it on your other devices)</label><div class=r><input id=lk2 readonly value="${E(base+'?g='+GID+'#dm='+KEY)}" style="flex:1"><button onclick="cp('lk2')">Copy</button></div></div>`}
+return`<div class=card><h3>Sharing</h3><div class=mu>${NETERR?E(NETERR):NETA?(CONN?'Connected ✔':'Offline. Changes will sync when you’re back online.'):'Connecting…'}</div><label>Player link (send this to your party)</label><div class=r><input id=lk1 readonly value="${E(base+'?g='+GID+'&p=1')}" style="flex:1"><button onclick="cp('lk1')">Copy</button></div><label>Your DM link (keep it private; open it on your other devices)</label><div class=r><input id=lk2 readonly value="${E(base+'?g='+GID+'#dm='+KEY)}" style="flex:1"><button onclick="cp('lk2')">Copy</button></div></div>`}
 /* ================= views ================= */
 const bar=c=>`<div class=hp><i style="width:${Math.round(pct(c)*100)}%;background:${col(pct(c))}"></i></div>`;
 const chips=(c,dmv)=>(c.conds||c.cd||[]).map((k,i)=>`<span class=ch ${dmv?`onclick="ci('${c.id}',${i})"`:""}>${E(k.n)}${k.n=='Concentrating'&&k.x?' · '+E(k.x):''}${k.d!=null?":"+k.d:""}${k.s&&k.n!='Concentrating'?` <small>by ${E(k.s)}</small>`:''}</span>`).join("");

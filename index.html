@@ -73,7 +73,7 @@ try{share=localStorage.getItem('rcl_share')=='1'}catch(e){}
 let UN=[],prevS=JSON.stringify(S.cur),VD={},pdone=false;
 let seenC=false,LO={};function tl(i){LO[i]=!LO[i];render()}
 let PI='';
-let NETA=null,UID=null,ISDM=false,CL={},SH={},PL=[],PK='',pTab='b',SHM='',shT=null,NETERR='',CONN=false,INITS={},INA={},LIVEJ='',SYNC=false,pushT=null,LT=0,DEV='';
+let NETA=null,UID=null,ISDM=false,CL={},SH={},PL=[],PK='',pTab='b',shOpen=false,SHM='',shT=null,NETERR='',CONN=false,INITS={},INA={},LIVEJ='',SYNC=false,pushT=null,LT=0,DEV='';
 try{LT=+localStorage.getItem('rcl_t')||0;DEV=localStorage.getItem('rcl_dev')||'';if(!DEV){DEV=U()+U();localStorage.setItem('rcl_dev',DEV)}}catch(e){}
 const B=()=>'games/'+GID+'/';
 /* ================= helpers ================= */
@@ -328,9 +328,9 @@ const ks=Object.keys(L).sort((a,b)=>L[b].dmg-L[a].dmg);
 let h=n?(L[n]?blk(n,L[n],1):`<div class="card mu">No stats for ${E(n)} yet. They appear after your first attack, spell or heal.</div>`):`<div class=card><h3>Which character are you?</h3>${claimUI()}</div>`;
 if(ks.filter(k=>k!=n).length)h+=`<h3 style='margin-top:14px'>Party</h3>`+ks.filter(k=>k!=n).map(k=>blk(k,L[k],0)).join('');
 return h+`<div class=mu style='text-align:center'>Across every battle so far, including the current one.</div>`}
-function player(){
-const nav=`<div class=r style='justify-content:center;gap:8px'><button class="${pTab=='b'?'p':''}" onclick="ptab('b')">Battle${P&&P.rc?' ❗':''}</button><button class="${pTab=='s'?'p':''}" onclick="ptab('s')">My sheet</button><button class="${pTab=='t'?'p':''}" onclick="ptab('t')">My stats</button></div>`;
-if(pTab=='s')return nav+sheetH();
+function player(){return playerBase()+(shOpen?`<div class=ov onclick="if(event.target===this){shOpen=false;render()}"><div style='width:100%;max-width:420px'>${sheetH()}<div class=r style='justify-content:center'><button class=p onclick="shOpen=false;render()">Close</button></div></div></div>`:'')}
+function playerBase(){
+const nav=`<div class=r style='justify-content:center;gap:8px'><button class="${pTab=='b'?'p':''}" onclick="ptab('b')">Battle${P&&P.rc?' ❗':''}</button><button class="${shOpen?'p':''}" onclick="shOpen=true;render()">My sheet</button><button class="${pTab=='t'?'p':''}" onclick="ptab('t')">My stats</button></div>`;
 if(pTab=='t')return nav+statsH();
 const o=false,ch='';
 if(P&&P.rc)return nav+ch+readyH();
